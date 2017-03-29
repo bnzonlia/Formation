@@ -1,7 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: bnzonlia
- * Date: 28/02/2017
- * Time: 16:15
- */
+namespace OCFram;
+
+class NotNullValidator extends Validator
+{
+	public function isValid($value)
+	{
+		return $value != '';
+	}
+}

@@ -3,17 +3,20 @@ namespace Entity;
 
 use \OCFram\Entity;
 
+
 class News extends Entity
 {
 	protected $auteur,
 		$titre,
 		$contenu,
 		$dateAjout,
-		$dateModif;
+		$dateModif,
+	    $user;
 	
 	const AUTEUR_INVALIDE = 1;
 	const TITRE_INVALIDE = 2;
 	const CONTENU_INVALIDE = 3;
+	const LOGIN_INVALIDE=4;
 	
 	public function isValid()
 	{
@@ -22,15 +25,30 @@ class News extends Entity
 	
 	
 	// SETTERS //
+
+	public function setUser( User $user ) {
+		if ($user->isValid()) {
+			$this->user = $user;
+		}
+	}
 	
 	public function setAuteur($auteur)
 	{
-		if (!is_string($auteur) || empty($auteur))
+		if (!is_int($auteur) || empty($auteur))
 		{
 			$this->erreurs[] = self::AUTEUR_INVALIDE;
 		}
 		
 		$this->auteur = $auteur;
+	}
+	public function setLogin($login)
+	{
+		if (!is_string($login) || empty($login))
+		{
+			$this->erreurs[] = self::AUTEUR_INVALIDE;
+		}
+
+		$this->login = $login;
 	}
 	
 	public function setTitre($titre)
@@ -64,10 +82,19 @@ class News extends Entity
 	}
 	
 	// GETTERS //
-	
+
+	public function user()
+	{
+		return $this->user;
+	}
+
 	public function auteur()
 	{
 		return $this->auteur;
+	}
+	public function login()
+	{
+		return $this->login;
 	}
 	
 	public function titre()
