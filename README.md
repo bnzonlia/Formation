@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-
-=======
-## Exercices
+## Exercice for Erwan
 
 # 0 - Build the full FrameWork from OCRoom : Done !
 
@@ -35,5 +32,12 @@
 Actually, you need to enter manually the value of a href attribute according to the route.xml file. 
 What happens if tomorrow i decided to edit a root ?
 All your code is break down.
-This part consist to add a functionnality for ask a route for a Controller and an Action using a function. Replace the manually entered href by a call of this function.
->>>>>>> 9ac0b5f029300bd327103ab475f47c87b6f51c21
+This part consist to add a functionnality for ask a route for a Controller and an Action using a function. Replace the manually entered href by a call of this function. 
+
+# 7 - Add Feature : Ajax ! Flower Party :)
+* Change the comportment of the form to add a comment in a news page.
+* The form are include in the same page of the news. On top and bottom of comment list.
+* Form to add new comment must work now with ajax. So when user submit his form, don't reload the page but post an ajax query to valid the form.
+* Show errors or add new comment directly if there are no error.
+* The HTTP Response of any ajax call must be a JSON Object.
+* Use jQuery to make your ajax query. 
