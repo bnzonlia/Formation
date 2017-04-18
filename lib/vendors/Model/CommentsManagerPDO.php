@@ -6,7 +6,7 @@ use Entity\User;
 
 class CommentsManagerPDO extends CommentsManager
 {
-	protected function add(Comment $comment)
+	protected function InsertCommentc(Comment $comment)
 	{
 		$sql = 'INSERT INTO comments
                     (news, auteur, contenu,datec,dateu)
@@ -20,21 +20,21 @@ class CommentsManagerPDO extends CommentsManager
 		$comment->setId( $this->dao->lastInsertId() );
 	}
 	
-	public function delete($id)
+	public function deleteCommentcUsingCommentcId($commentc_id)
 	{
-		$sql = 'DELETE FROM comments WHERE id = '.(int) $id;
+		$sql = 'DELETE FROM comments WHERE id = '.(int) $commentc_id;
 		$stmt = $this->dao->prepare( $sql );
 		$stmt->execute();
 	}
 	
-	public function deleteFromNews($news)
+	public function deleteCommentcUsingNewscId($newsc_id)
 	{
-		$sql = 'DELETE FROM comments WHERE news = '.(int) $news;
+		$sql = 'DELETE FROM comments WHERE news = '.(int) $newsc_id;
 		$stmt = $this->dao->prepare( $sql );
 		$stmt->execute();
 	}
 	
-	public function getListOf($news)
+	public function getCommentcUsingNewscId($newsc_id)
 	{
 		$sql = 'SELECT id, news, auteur, contenu, datec ,MMC_id,MMC_firstname,MMC_lastname,MMC_login,MMC_password,MMC_datebirth,MMC_fk_MMY
                 FROM comments
@@ -44,10 +44,10 @@ class CommentsManagerPDO extends CommentsManager
                 ORDER BY id DESC';
 
 		$stmt = $this->dao->prepare( $sql );
-		$stmt->bindValue( ':news', (int)$news, \PDO::PARAM_INT );
+		$stmt->bindValue( ':news', (int)$newsc_id, \PDO::PARAM_INT );
 		$stmt->setFetchMode( \PDO::FETCH_ASSOC );
 		$stmt->execute();
-		$Liste_comments = [];
+		$Liste_comments_a = [];
 		while ( $Comment = $stmt->fetch() ) {
 			$New_comment = new Comment( [
 				'id'           => $Comment[ 'id' ],
@@ -68,17 +68,17 @@ class CommentsManagerPDO extends CommentsManager
 					'membertype' => $Comment[ 'MMC_fk_MMY' ],
 				] );
 			}
-			$Liste_comments[] = $New_comment;
+			$Liste_comments_a[] = $New_comment;
 
 		}
 
 		$stmt->closeCursor();
 
-		return $Liste_comments;
+		return $Liste_comments_a;
 
 	}
 	
-	protected function modify(Comment $comment)
+	protected function UpdateCommentc(Comment $comment)
 	{
 		$q = $this->dao->prepare('UPDATE comments SET contenu = :contenu ,dateu = NOW() WHERE id = :id');
 
@@ -88,10 +88,10 @@ class CommentsManagerPDO extends CommentsManager
 		$q->execute();
 	}
 	
-	public function get($id)
+	public function getCommentcUsingCommentcId($commentc_id)
 	{
 		$q = $this->dao->prepare('SELECT id, news, auteur, contenu FROM comments WHERE id = :id');
-		$q->bindValue(':id', (int) $id, \PDO::PARAM_INT);
+		$q->bindValue(':id', (int) $commentc_id, \PDO::PARAM_INT);
 		$q->execute();
 		
 		$q->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, '\Entity\Comment');

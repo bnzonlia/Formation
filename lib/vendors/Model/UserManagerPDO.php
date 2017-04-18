@@ -5,7 +5,7 @@ class UserManagerPDO extends UserManager
 {
 
 
-	protected function add(User $user)
+	protected function insertUserc(User $user)
 	{
 		$requete = $this->dao->prepare('INSERT INTO t_mem_memberc SET  MMC_firstname = :MMC_firstname, MMC_lastname = :MMC_lastname, MMC_login = :MMC_login, MMC_password = :MMC_password , MMC_datebirth = NOW()');
 		
@@ -23,17 +23,19 @@ class UserManagerPDO extends UserManager
 		$requete->bindValue(':MMC_fk_MMY', $user->membertype());
 		$requete->execute();
 	}
-	public function count()
+	public function countUserc()
 	{
 		$requete= $this->dao->prepare('SELECT COUNT(*) FROM t_mem_memberc')->fetchColumn();
 		$requete->execute();
 		return $requete;
 	}
-	public function delete($id)
+	public function deleteUsercUsingUsercId($Userc_id)
 	{
-		$this->dao->exec('DELETE FROM t_mem_memberc WHERE MMC_id = '.(int) $id);
+		$requete = $this->dao->prepare('DELETE FROM t_mem_memberc WHERE MMC_id = '.(int) $Userc_id);
+		$requete->execute();
+		
 	}
-	public function getList($debut = -1, $limite = -1)
+	public function getUsercSortByIdDesc($debut = -1, $limite = -1)
 	{
 		$sql = 'SELECT MMC_id as id, MMC_firstname as firstname, MMC_lastname as lastname, MMC_login as login, MMC_password as password, MMC_datebirth  as datebirth, MMC_fk_MMY as membertype FROM t_mem_memberc ORDER BY MMC_id DESC';
 		
@@ -58,10 +60,10 @@ class UserManagerPDO extends UserManager
 		return $listeUser;
 	}
 	
-	public function getUnique($id)
+	public function getUsercUsingUsercId($Userc_id)
 	{
 		$requete = $this->dao->prepare('SELECT MMC_id as id, MMC_firstname as firstname, MMC_lastname as lastname, MMC_login as login, MMC_password as password, MMC_datebirth  as datebirth FROM t_mem_memberc WHERE MMC_id = :MMC_id');
-		$requete->bindValue(':MMC_id', (int) $id, \PDO::PARAM_INT);
+		$requete->bindValue(':MMC_id', (int) $Userc_id, \PDO::PARAM_INT);
 		$requete->execute();
 		
 		$requete->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, '\Entity\User');
@@ -75,7 +77,7 @@ class UserManagerPDO extends UserManager
 		
 		return null;
 	}
-	protected function modify(User $user)
+	protected function UpdateUserc(User $user)
 	{
 		$requete = $this->dao->prepare('UPDATE t_mem_memberc SET  MMC_firstname = :MMC_firstname, MMC_lastname = :MMC_lastname, MMC_login = :MMC_login,MMC_password = SHA1(:MMC_password) ,MMC_datebirth = NOW() WHERE MMC_id = :MMC_id');
 		

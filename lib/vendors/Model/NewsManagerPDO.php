@@ -5,7 +5,7 @@ use \Entity\User;
 
 class NewsManagerPDO extends NewsManager
 {
-	protected function add(News $news)
+	protected function InsertNewsc(News $news)
 	{
 		/**
 		 * @var $stmt  \PDOStatement
@@ -20,15 +20,15 @@ class NewsManagerPDO extends NewsManager
 		$stmt->bindValue( ':contenu', $news->contenu(), \PDO::PARAM_STR );
 		$stmt->execute();
 	}
-	public function count()
+	public function countNewsc()
 	{
 		return $this->dao->query('SELECT COUNT(*) FROM news')->fetchColumn();
 	}
-	public function delete($id)
+	public function deleteNewscUsingNewscId($newsc_id)
 	{
-		$this->dao->exec('DELETE FROM news WHERE id = '.(int) $id);
+		$this->dao->exec('DELETE FROM news WHERE id = '.(int) $newsc_id);
 	}
-	public function getList($debut = -1, $limite = -1)
+	public function getNewscAndUserSortByIdDesc($debut = -1, $limite = -1)
 	{
 		$sql = 'SELECT id, auteur, titre, contenu, dateAjout, dateModif ,MMC_id,MMC_firstname,MMC_lastname,MMC_login,MMC_password,MMC_datebirth,MMC_fk_MMY
 									FROM news
@@ -44,10 +44,10 @@ class NewsManagerPDO extends NewsManager
 		$query->setFetchMode( \PDO::FETCH_ASSOC );
 		$query->execute();
 
-		$listeNews = [];
+		$listeNews_a = [];
 		while ( $News = $query->fetch() ) {
 
-			$listeNews[] = new News( [
+			$listeNews_a[] = new News( [
 				'id'         => (int)$News[ 'id' ],
 				'auteur'     => (int)$News[ 'auteur' ],
 				'titre'      => $News[ 'titre' ],
@@ -68,11 +68,11 @@ class NewsManagerPDO extends NewsManager
 		}
 		$query->closeCursor();
 
-		return $listeNews;
+		return $listeNews_a;
 
 	}
 	
-	public function getUnique($id)
+	public function getNewscUsingNewscId($newsc_id)
 	{
 		/**
 		 * @var $stmt \PDOStatement
@@ -83,7 +83,7 @@ class NewsManagerPDO extends NewsManager
                 WHERE id = :id';
 
 		$query = $this->dao->prepare( $sql );
-		$query->bindValue( ':id', $id, \PDO::PARAM_INT );
+		$query->bindValue( ':id', $newsc_id, \PDO::PARAM_INT );
 		$query->execute();
 
 		if ( $result = $query->fetch( \PDO::FETCH_ASSOC ) ) {
@@ -115,7 +115,7 @@ class NewsManagerPDO extends NewsManager
 
 	}
 
-	protected function modify(News $news)
+	protected function UpdateNewsc(News $news)
 	{
 		$requete = $this->dao->prepare('UPDATE news SET titre = :titre, contenu = :contenu, dateModif = NOW() WHERE id = :id');
 		

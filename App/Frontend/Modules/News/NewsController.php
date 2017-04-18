@@ -24,7 +24,7 @@ class NewsController extends BackController {
 		// On récupère le manager des news.
 		$manager = $this->managers->getManagerOf( 'News' );
 		
-		$listeNews = $manager->getList( 0, $nombreNews );
+		$listeNews = $manager->getNewscAndUserSortByIdDesc( 0, $nombreNews );
 		
 		foreach ( $listeNews as $News ) {
 			if ( strlen( $News->contenu() ) > $nombreCaracteres ) {
@@ -38,14 +38,14 @@ class NewsController extends BackController {
 	}
 	
 	public function executeShow( HTTPRequest $request ) {
-		$news = $this->managers->getManagerOf( 'News' )->getUnique( $request->getData( 'id' ) );
+		$news = $this->managers->getManagerOf( 'News' )->getNewscUsingNewscId( $request->getData( 'id' ) );
 
 		if ( empty( $news ) ) {
 			self::$app->httpResponse()->redirect404();
 		}
 		$this->page->addVar( 'title', $news->titre() );
 		$this->page->addVar( 'news', $news );
-		$this->page->addVar( 'comments', $this->managers->getManagerOf( 'Comments' )->getListOf( $news->id() ) );
+		$this->page->addVar( 'comments', $this->managers->getManagerOf( 'Comments' )->getCommentcUsingNewscId( $news->id() ) );
 	}
 
 	public function executeInsertComment( HTTPRequest $request ) {

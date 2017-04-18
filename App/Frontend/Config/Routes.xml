@@ -5,4 +5,6 @@
 	<route url="/connexion/" module="connexion" action="index" ></route>
 	<route url="/news-([0-9]+)\.html" module="News" action="show" vars="id"></route>
 	<route url="/commenter-([0-9]+)\.html" module="News" action="insertComment" vars="news" ></route>
+	<route url="/commenter-([0-9]+)\.json" module="News" action="insertCommentFromAjax" vars="id" format="json" />
+	<route url="/refresh-comments-([0-9]+)\.json" module="News" action="RefreshCommentsFromAjax" vars="id" format="json" />
 </routes>

@@ -20,21 +20,22 @@ class NewsController extends BackController {
 		
 		/** je recupère les informations du membre connecté */
 		$user = self::$app->user()->getAttribute( 'Member' );
+		/** @var NewsManagerPDO $manager */
 		$manager=$this->managers->getManagerOf( 'News' );
-		$news= $manager->getUnique($newsId);
+		$news= $manager->getNewscUsingNewscId($newsId);
 
 		/** si le user est un admin supreme il supprime */
 		if ($user->membertype()== 1 ) {
-			$this->managers->getManagerOf( 'News' )->delete( $newsId );
-			$this->managers->getManagerOf( 'Comments' )->deleteFromNews( $newsId );
+			$this->managers->getManagerOf( 'News' )->deleteNewscUsingNewscId( $newsId );
+			$this->managers->getManagerOf( 'Comments' )->deleteCommentcUsingNewscId( $newsId );
 			self::$app->user()->setFlash( 'La news a bien été supprimée !' );
 			self::$app->httpResponse()->redirect( NewsController::getLinkToBuildIndex() );
 		}
 		/** sinon , c'est un admin partiel et il ne peut que supprimer sa news */
 		 elseif ($user->membertype()== 0 && $user->id() == $news->auteur())
 		 {
-			 $this->managers->getManagerOf( 'News' )->delete( $newsId );
-			 $this->managers->getManagerOf( 'Comments' )->deleteFromNews( $newsId );
+			 $this->managers->getManagerOf( 'News' )->deleteNewscUsingNewscId( $newsId );
+			 $this->managers->getManagerOf( 'Comments' )->deleteCommentcUsingNewscId( $newsId );
 			 self::$app->user()->setFlash( 'La news a bien été supprimée !' );
 			 self::$app->httpResponse()->redirect( NewsController::getLinkToBuildIndex() );
 		 }
@@ -49,18 +50,18 @@ class NewsController extends BackController {
 		/** je recupère les informations du membre connecté */
 		$user = self::$app->user()->getAttribute( 'Member' );
 		$manager=$this->managers->getManagerOf( 'Comments' );
-		$com= $manager->get($request->getData( 'id' ));
+		$com= $manager->getCommentcUsingCommentcId($request->getData( 'id' ));
 		/** si le user est un admin supreme il supprime */
 		if ($user->membertype()== 1 ) {
 
-			$this->managers->getManagerOf( 'Comments' )->delete( $request->getData( 'id' ) );
+			$this->managers->getManagerOf( 'Comments' )->deleteCommentcUsingCommentcId( $request->getData( 'id' ) );
 			self::$app->user()->setFlash( 'Le commentaire a bien été supprimé !' );
 			self::$app->httpResponse()->redirect( NewsController::getLinkToBuildIndex() );
 		}
 		/** sinon , c'est un admin partiel et il ne peut que supprimer son commentaire */
 		elseif ($user->membertype()== 0 && (int) $user->id() == $com->auteur())
 		{
-			$this->managers->getManagerOf( 'Comments' )->delete( $request->getData( 'id' ) );
+			$this->managers->getManagerOf( 'Comments' )->deleteCommentcUsingCommentcId( $request->getData( 'id' ) );
 			self::$app->user()->setFlash( 'Le commentaire a bien été supprimé !' );
 			self::$app->httpResponse()->redirect(NewsController::getLinkToBuildIndex() );
 		}
@@ -77,8 +78,8 @@ class NewsController extends BackController {
 		/** @var NewsManagerPDO $manager */
 		$manager = $this->managers->getManagerOf( 'News' );
 		
-		$this->page->addVar( 'listeNews', $manager->getList() );
-		$this->page->addVar( 'nombreNews', $manager->count() );
+		$this->page->addVar( 'listeNews', $manager->getNewscAndUserSortByIdDesc() );
+		$this->page->addVar( 'nombreNews', $manager->countNewsc() );
 	}
 	
 	public function executeInsert( HTTPRequest $request ) {
@@ -99,7 +100,7 @@ class NewsController extends BackController {
 		/** je recupère les informations du membre connecté */
 		$user = self::$app->user()->getAttribute( 'Member' );
 		$manager=$this->managers->getManagerOf( 'Comments' );
-		$com= $manager->get($request->getData( 'id' ));
+		$com= $manager->getCommentcUsingCommentcId($request->getData( 'id' ));
 
 		/** si le user est un admin supreme il modifie tous Les commentaires */
 		if ($user->membertype()== 1 ) {
@@ -112,7 +113,7 @@ class NewsController extends BackController {
 				] );
 			}
 			else {
-				$comment = $this->managers->getManagerOf( 'Comments' )->get( $request->getData( 'id' ) );
+				$comment = $this->managers->getManagerOf( 'Comments' )->getCommentcUsingCommentcId( $request->getData( 'id' ) );
 			}
 
 			$formBuilder = new CommentFormBuilder( $comment );
@@ -142,7 +143,7 @@ class NewsController extends BackController {
 				] );
 			}
 			else {
-				$comment = $this->managers->getManagerOf( 'Comments' )->get( $request->getData( 'id' ) );
+				$comment = $this->managers->getManagerOf( 'Comments' )->getCommentcUsingCommentcId( $request->getData( 'id' ) );
 			}
 
 			$formBuilder = new CommentFormBuilder( $comment );
@@ -172,8 +173,9 @@ class NewsController extends BackController {
 
 		/** je recupère les informations du membre connecté */
 		$user    = self::$app->user()->getAttribute( 'Member' );
+		/** @var NewsManagerPDO $manager */
 		$manager = $this->managers->getManagerOf( 'News' );
-		$com = $manager->getUnique( $request->getData( 'id' ) );
+		$com = $manager->getNewscUsingNewscId( $request->getData( 'id' ) );
 		 if($user->membertype()==0)
 		 {
 			 if ($request->method() == 'POST')
@@ -199,7 +201,7 @@ class NewsController extends BackController {
 
 				else if ($request->getExists('id')&& $user->id()==$com->auteur())
 				 {
-					 $news = $this->managers->getManagerOf('News')->getUnique($request->getData('id'));
+					 $news = $this->managers->getManagerOf('News')->getNewscUsingNewscId($request->getData('id'));
 				 }
 				 else
 				 {
@@ -243,7 +245,7 @@ class NewsController extends BackController {
 				// L'identifiant de la news est transmis si on veut la modifier
 				if ($request->getExists('id'))
 				{
-					$news = $this->managers->getManagerOf('News')->getUnique($request->getData('id'));
+					$news = $this->managers->getManagerOf('News')->getNewscUsingNewscId($request->getData('id'));
 				}
 				else
 				{

@@ -13,21 +13,21 @@ abstract class CommentsManager extends Manager
 	 * @param $comment Le commentaire à ajouter
 	 * @return void
 	 */
-	abstract protected function add(Comment $comment);
+	abstract protected function InsertCommentc(Comment $comment);
 	
 	/**
 	 * Méthode permettant de supprimer un commentaire.
 	 * @param $id L'identifiant du commentaire à supprimer
 	 * @return void
 	 */
-	abstract public function delete($id);
+	abstract public function deleteCommentcUsingCommentcId($commentc_id);
 	
 	/**
 	 * Méthode permettant de supprimer tous les commentaires liés à une news
 	 * @param $news L'identifiant de la news dont les commentaires doivent être supprimés
 	 * @return void
 	 */
-	abstract public function deleteFromNews($news);
+	abstract public function deleteCommentcUsingNewscId($newsc_id);
 	
 	/**
 	 * Méthode permettant d'enregistrer un commentaire.
@@ -50,7 +50,7 @@ abstract class CommentsManager extends Manager
 
 		if ($comment->isValid())
 		{
-			$comment->isNew() ? $this->add($comment) : $this->modify($comment);
+			$comment->isNew() ? $this->InsertCommentc($comment) : $this->UpdateCommentc($comment);
 		}
 		else
 		{
@@ -63,19 +63,19 @@ abstract class CommentsManager extends Manager
 	 * @param $news La news sur laquelle on veut récupérer les commentaires
 	 * @return array
 	 */
-	abstract public function getListOf($news);
+	abstract public function getCommentcUsingNewscId($news_id);
 	
 	/**
 	 * Méthode permettant de modifier un commentaire.
 	 * @param $comment Le commentaire à modifier
 	 * @return void
 	 */
-	abstract protected function modify(Comment $comment);
+	abstract protected function UpdateCommentc(Comment $comment);
 	
 	/**
 	 * Méthode permettant d'obtenir un commentaire spécifique.
 	 * @param $id L'identifiant du commentaire
 	 * @return Comment
 	 */
-	abstract public function get($id);
+	abstract public function getCommentcUsingCommentcId($commentc_id);
 }
