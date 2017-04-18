@@ -3,6 +3,7 @@
 namespace App\Frontend\Modules\Inscription;
 
 use App\Backend\Modules\Connexion\ConnexionController;
+use App\Backend\Modules\News\NewsController;
 use \OCFram\BackController;
 use \OCFram\HTTPRequest;
 use \Entity\User;
@@ -31,8 +32,8 @@ class InscriptionController extends BackController {
 		$formHandler = new FormHandler( $form, $this->managers->getManagerOf( 'User' ), $request );
 		
 		if ( $formHandler->process() ) {
-			$this->app->user()->setFlash( 'Le user a bien été ajouté !' );
-			$this->app->httpResponse()->redirect( '/admin/' );
+			self::$app->user()->setFlash( 'Le user a bien été ajouté !' );
+			self::$app->httpResponse()->redirect( NewsController::getLinkToBuildIndex() );
 		}
 		
 		$this->page->addVar( 'form', $form->createView() );

@@ -8,14 +8,15 @@ class Comment extends Entity
 	protected $news,
 		$auteur,
 		$contenu,
-		$date;
+		$datec,
+		$dateu;
 	
 	const AUTEUR_INVALIDE = 1;
 	const CONTENU_INVALIDE = 2;
 	
 	public function isValid()
 	{
-		return !(empty($this->auteur) || empty($this->contenu));
+		return !empty( $this->contenu ) AND is_string( $this->contenu );
 	}
 	
 	public function setNews($news)
@@ -43,9 +44,14 @@ class Comment extends Entity
 		$this->contenu = $contenu;
 	}
 	
-	public function setDate(\DateTime $date)
+	public function setDatec(\DateTime $datec)
 	{
-		$this->date = $date;
+		$this->datec = $datec;
+	}
+	
+	public function setDateu(\DateTime $dateu)
+	{
+		$this->dateu = $dateu;
 	}
 	
 	public function news()
@@ -63,8 +69,12 @@ class Comment extends Entity
 		return $this->contenu;
 	}
 	
-	public function date()
+	public function datec()
 	{
-		return $this->date;
+		return $this->datec;
+	}
+	public function dateu()
+	{
+		return $this->dateu;
 	}
 }

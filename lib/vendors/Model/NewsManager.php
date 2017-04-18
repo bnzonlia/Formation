@@ -60,11 +60,4 @@ abstract class NewsManager extends Manager
 	 * @return void
 	 */
 	abstract protected function modify(News $news);
-	/**
-	 * Méthode permettant de recuperer l'id de l'auteur d'une news.
-	 * @param $news news l'idée de la news a recuperer
-	 * @return void
-	 */
-	abstract public function getAuthorId();
-
 }

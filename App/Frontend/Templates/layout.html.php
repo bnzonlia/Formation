@@ -1,3 +1,9 @@
+<?php
+/**
+ * @var $user    \OCFram\User
+ * @var $content string Contenu de la page à afficher
+ */
+?>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -19,8 +25,13 @@
 			
 			<nav>
 				<ul>
-					<li><a href="/">Accueil</a></li>
-					<?php if ( $user->isAuthenticated() ) { ?>
+					<?php if ( $User->isAuthenticated()==false ) { ?>
+						<li><a href="/">Accueil</a></li>
+						<li><a href="/connexion/">Connexion</a></li>
+						<li><a href="/inscription/">S'inscrire</a></li>
+					<?php } ?>
+					<?php if ( $User->isAuthenticated() ) { ?>
+						<li><a href="/">Accueil</a></li>
 						<li><a href="/admin/">Admin</a></li>
 						<li><a href="/admin/news-insert.html">Ajouter une news</a></li>
 						<li><a href="/admin/logout.php">Se deconnecter</a></li>
@@ -30,8 +41,8 @@
 			
 			<div id="content-wrap">
 				<section id="main">
-					<?php if ( $user->hasFlash() ) {
-						echo '<p style="text-align: center;">', $user->getFlash(), '</p>';
+					<?php if ( $User->hasFlash() ) {
+						echo '<p style="text-align: center;">', $User->getFlash(), '</p>';
 					} ?>
 					
 					<?= $content ?>

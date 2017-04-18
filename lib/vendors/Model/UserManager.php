@@ -4,6 +4,8 @@ use \OCFram\Manager;
 use \Entity\User;
 abstract class UserManager extends Manager
 {
+	const MMY_INVITE = 3;
+	
 	/**
 	 * Méthode permettant d'ajouter un user.
 	 * @param $user User Le user à ajouter
@@ -22,7 +24,9 @@ abstract class UserManager extends Manager
 	{
 		if ($user->isValid())
 		{
-			$user->isNew() ? $this->add($user) : $this->modify($user);
+			$user->setPassword(password_hash($user->password(), PASSWORD_BCRYPT));
+			//$user->isNew() ? $this->add($user) : $this->modify($user); si update prevu
+			$this->add($user);
 		}
 		else
 		{

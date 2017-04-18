@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Backend\Modules\Connexion;
+namespace App\Frontend\Modules\Connexion;
 
 use App\Backend\Modules\News\NewsController;
 use Model\UserManager;
@@ -11,11 +11,11 @@ use \Entity\User;
 class ConnexionController extends BackController {
 	public function executeIndex( HTTPRequest $request ) {
 		$this->page->addVar( 'title', 'Connexion' );
-		
+
 		if ( $request->postExists( 'login' ) ) {
 			$login    = $request->postData( 'login' );
 			$password = $request->postData( 'password' );
-			
+
 			$manager = $this->managers->getManagerOf( 'User' );
 			$user    = $manager->getUserUsingLogin( $login );
 
@@ -26,16 +26,16 @@ class ConnexionController extends BackController {
 
 				if($user->membertype() == 0){
 					// redirection admin
-					self::$app->httpResponse()->redirect( '.' );
+					self::$app->httpResponse()->redirect( NewsController::getLinkToBuildIndex() );
 				}
-				self::$app->httpResponse()->redirect( '.' );
+				self::$app->httpResponse()->redirect( NewsController::getLinkToBuildIndex() );
 
 			}else {
 				self::$app->user()->setFlash( 'login ou mot de passe incorrect' );
 			}
 		}
 	}
-	
+
 	public function executeLogout( HTTPRequest $request ) {
 		session_unset();
 		session_destroy();

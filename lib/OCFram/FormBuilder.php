@@ -17,6 +17,9 @@ abstract class FormBuilder
 		$this->form = $form;
 	}
 	
+	/**
+	 * @return Form
+	 */
 	public function form()
 	{
 		return $this->form;

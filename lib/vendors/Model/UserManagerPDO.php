@@ -3,9 +3,11 @@ namespace Model;
 use \Entity\User;
 class UserManagerPDO extends UserManager
 {
+
+
 	protected function add(User $user)
 	{
-		$requete = $this->dao->prepare('INSERT INTO t_mem_memberc SET  MMC_firstname = :MMC_firstname, MMC_lastname = :MMC_lastname, MMC_login = :MMC_login, MMC_password = SHA1(:MMC_password) , MMC_datebirth = NOW()');
+		$requete = $this->dao->prepare('INSERT INTO t_mem_memberc SET  MMC_firstname = :MMC_firstname, MMC_lastname = :MMC_lastname, MMC_login = :MMC_login, MMC_password = :MMC_password , MMC_datebirth = NOW()');
 		
 		$requete->bindValue(':MMC_firstname', $user->firstname());
 		$requete->bindValue(':MMC_lastname', $user->lastname());
@@ -13,9 +15,19 @@ class UserManagerPDO extends UserManager
 		$requete->bindValue(':MMC_password', $user->password());
 		$requete->execute();
 	}
+	public function addInvite(User $user)
+	{
+		$requete = $this->dao->prepare('INSERT INTO t_mem_memberc SET  MMC_login = :MMC_login,MMC_fk_MMY = :MMC_fk_MMY, MMC_datebirth = NOW()');
+
+		$requete->bindValue(':MMC_login', $user->login());
+		$requete->bindValue(':MMC_fk_MMY', $user->membertype());
+		$requete->execute();
+	}
 	public function count()
 	{
-		return $this->dao->query('SELECT COUNT(*) FROM t_mem_memberc')->fetchColumn();
+		$requete= $this->dao->prepare('SELECT COUNT(*) FROM t_mem_memberc')->fetchColumn();
+		$requete->execute();
+		return $requete;
 	}
 	public function delete($id)
 	{
@@ -23,15 +35,16 @@ class UserManagerPDO extends UserManager
 	}
 	public function getList($debut = -1, $limite = -1)
 	{
-		$sql = 'SELECT MMC_id as id, MMC_firstname as firstname, MMC_lastname as lastname, MMC_login as login, MMC_password as password, MMC_datebirth  as datebirth FROM t_mem_memberc ORDER BY MMC_id DESC';
+		$sql = 'SELECT MMC_id as id, MMC_firstname as firstname, MMC_lastname as lastname, MMC_login as login, MMC_password as password, MMC_datebirth  as datebirth, MMC_fk_MMY as membertype FROM t_mem_memberc ORDER BY MMC_id DESC';
 		
 		if ($debut != -1 || $limite != -1)
 		{
 			$sql .= ' LIMIT '.(int) $limite.' OFFSET '.(int) $debut;
 		}
 		
-		$requete = $this->dao->query($sql);
+		$requete = $this->dao->prepare( $sql );
 		$requete->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, '\Entity\User');
+		$requete->execute();
 		
 		$listeUser = $requete->fetchAll();
 		
@@ -96,5 +109,30 @@ class UserManagerPDO extends UserManager
 		}
 		return null;
 	}
-	
+
+	/**
+	 * recupere un user grace a son login qui n'ai pas un invite
+	 * @param $login
+	 *
+	 * @return null
+	 */
+	public function getUserWithoutGuestUsingLogin($login)
+	{
+		$sql= $this->dao->prepare('SELECT MMC_id as id, MMC_firstname as firstname, MMC_lastname as lastname, MMC_login as login, MMC_password as password, MMC_datebirth  as datebirth , MMC_fk_MMY as membertype
+ 									FROM  t_mem_memberc
+ 									WHERE MMC_login = :MMC_login AND MMC_fk_MMY!= :MMC_fk_MMY');
+
+		$sql->bindvalue(':MMC_login',(string) $login);
+		$sql->bindvalue(':MMC_fk_MMY', UserManager::MMY_INVITE);
+		$sql->execute();
+		$sql->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, '\Entity\User');
+
+		if ($user = $sql->fetch())
+		{
+			$user->setDateBirth(new \DateTime($user->datebirth()));
+
+			return $user;
+		}
+		return null;
+	}
 }

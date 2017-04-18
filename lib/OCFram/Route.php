@@ -1,90 +1,176 @@
 <?php
 namespace OCFram;
-
-class Route
-{
+/**
+ * Class Route
+ * Modélise une route
+ *
+ * @package OCFram
+ */
+class Route {
+	use Hydrator;
+	/**
+	 * @var $action string
+	 */
 	protected $action;
+	/**
+	 * @var $module string
+	 */
 	protected $module;
+	/**
+	 * @var $url string
+	 */
 	protected $url;
+	/**
+	 * @var $varsNames string[] Noms des variables nécessaires à la route
+	 */
 	protected $varsNames;
-	protected $vars = [];
-	
-	public function __construct($url, $module, $action, array $varsNames)
-	{
-		$this->setUrl($url);
-		$this->setModule($module);
-		$this->setAction($action);
-		$this->setVarsNames($varsNames);
+	/**
+	 * @var $vars array Valeurs des variables nécessaires à la route
+	 */
+	protected $vars;
+	/**
+	 * @var $format string Format d'affichage de la page (html, json, etc.)
+	 */
+	protected $format;
+
+	/**
+	 * Construit une nouvelle route en l'hydratant.
+	 *
+	 * @param array $attributes Tableau associatif attribut-valeur
+	 */
+	public function __construct( array $attributes ) {
+		$this->hydrate( $attributes );
+		if ( !isset( $this->vars ) ) {
+			$this->setVars( array() );
+		}
 	}
-	
-	public function hasVars()
-	{
-		return !empty($this->varsNames);
+
+	/**
+	 * Vérifie si la route a besoin de variables pour que la page soit trouvée.
+	 *
+	 * @return bool
+	 */
+	public function hasVars() {
+		return !empty( $this->varsNames );
 	}
-	
-	public function match($url)
-	{
-		if (preg_match('`^'.$this->url.'$`', $url, $matches))
-		{
+
+	/**
+	 * Vérifie si l'url fournie correspond à l'url de la route (présente dans le fichier routes.xml).
+	 * Si oui, renvoie les paramètres passés à la route.
+	 *
+	 * @param $url string
+	 *
+	 * @return false|string[]
+	 */
+	public function match( $url ) {
+		if ( preg_match( '%^' . $this->url . '$%', $url, $matches ) ) {
 			return $matches;
 		}
-		else
-		{
-			return false;
-		}
+
+		return false;
 	}
-	
-	public function setAction($action)
-	{
-		if (is_string($action))
-		{
+
+	/**
+	 * Setter pour l'attribut action.
+	 *
+	 * @param $action string
+	 */
+	public function setAction( $action ) {
+		if ( is_string( $action ) ) {
 			$this->action = $action;
 		}
 	}
-	
-	public function setModule($module)
-	{
-		if (is_string($module))
-		{
+
+	/**
+	 * Setter pour l'attribut module.
+	 *
+	 * @param $module string
+	 */
+	public function setModule( $module ) {
+		if ( is_string( $module ) ) {
 			$this->module = $module;
 		}
 	}
-	
-	public function setUrl($url)
-	{
-		if (is_string($url))
-		{
+
+	/**
+	 * Setter pour l'attribut url.
+	 *
+	 * @param $url string
+	 */
+	public function setUrl( $url ) {
+		if ( is_string( $url ) ) {
 			$this->url = $url;
 		}
 	}
-	
-	public function setVarsNames(array $varsNames)
-	{
+
+	/**
+	 * Setter pour l'attribut varsNames.
+	 *
+	 * @param string[] $varsNames Noms des variables nécessaires à la route
+	 */
+	public function setVarsNames( array $varsNames ) {
 		$this->varsNames = $varsNames;
 	}
-	
-	public function setVars(array $vars)
-	{
+
+	/**
+	 * Setter pour l'attribut vars.
+	 *
+	 * @param array $vars Valeurs des variables nécessaires à la route
+	 */
+	public function setVars( array $vars ) {
 		$this->vars = $vars;
 	}
-	
-	public function action()
-	{
+
+	/**
+	 * Setter pour l'attribut format
+	 *
+	 * @param string $format Format de la page (html, json, etc.)
+	 */
+	public function setFormat($format) {
+		$this->format = $format;
+	}
+
+
+	/**
+	 * @return string
+	 */
+	public function action() {
 		return $this->action;
 	}
-	
-	public function module()
-	{
+
+	/**
+	 * @return string
+	 */
+	public function module() {
 		return $this->module;
 	}
-	
-	public function vars()
-	{
-		return $this->vars;
+
+	/**
+	 * @return string
+	 */
+	public function url() {
+		return $this->url;
 	}
-	
-	public function varsNames()
-	{
+
+	/**
+	 * @return \string[]
+	 */
+	public function varsNames() {
 		return $this->varsNames;
 	}
+
+	/**
+	 * @return array
+	 */
+	public function vars() {
+		return $this->vars;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function format() {
+		return $this->format;
+	}
+
 }

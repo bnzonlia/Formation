@@ -44,6 +44,7 @@ class Form
 		$valid = true;
 		
 		// On vérifie que tous les champs sont valides.
+		/** @var Field $field */
 		foreach ($this->fields as $field)
 		{
 			if (!$field->isValid())
@@ -55,6 +56,9 @@ class Form
 		return $valid;
 	}
 	
+	/**
+	 * @return Entity
+	 */
 	public function entity()
 	{
 		return $this->entity;

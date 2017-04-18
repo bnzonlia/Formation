@@ -25,6 +25,7 @@ abstract class Field
 	{
 		foreach ($this->validators as $validator)
 		{
+
 			if (!$validator->isValid($this->value))
 			{
 				$this->errorMessage = $validator->errorMessage();

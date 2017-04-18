@@ -4,6 +4,8 @@ namespace Model;
 use \OCFram\Manager;
 use \Entity\Comment;
 
+
+
 abstract class CommentsManager extends Manager
 {
 	/**
@@ -34,6 +36,18 @@ abstract class CommentsManager extends Manager
 	 */
 	public function save(Comment $comment)
 	{
+		if(!is_int($comment->auteur()))
+		{
+			//recuperation du string en id
+			$User_manager = new UserManagerPDO($this->dao);
+			$user =$User_manager->getUserUsingLogin($comment->auteur());
+			if($user ==null)
+			{
+				throw new 	\RuntimeException('le user n\'existe pas');
+			}
+			 $comment->setAuteur($user->id());
+		}
+
 		if ($comment->isValid())
 		{
 			$comment->isNew() ? $this->add($comment) : $this->modify($comment);

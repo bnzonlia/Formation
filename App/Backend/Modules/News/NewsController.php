@@ -11,6 +11,7 @@ use \Entity\Comment;
 use \FormBuilder\CommentFormBuilder;
 use \FormBuilder\NewsFormBuilder;
 use \OCFram\FormHandler;
+use OCFram\Router;
 
 class NewsController extends BackController {
 	public function executeDelete( HTTPRequest $request ) {
@@ -18,7 +19,7 @@ class NewsController extends BackController {
 		$newsId = $request->getData( 'id' );
 		
 		/** je recupère les informations du membre connecté */
-		$user = $this->app->user()->getAttribute( 'Member' );
+		$user = self::$app->user()->getAttribute( 'Member' );
 		$manager=$this->managers->getManagerOf( 'News' );
 		$news= $manager->getUnique($newsId);
 
@@ -26,46 +27,46 @@ class NewsController extends BackController {
 		if ($user->membertype()== 1 ) {
 			$this->managers->getManagerOf( 'News' )->delete( $newsId );
 			$this->managers->getManagerOf( 'Comments' )->deleteFromNews( $newsId );
-			$this->app->user()->setFlash( 'La news a bien été supprimée !' );
-			$this->app->httpResponse()->redirect( '.' );
+			self::$app->user()->setFlash( 'La news a bien été supprimée !' );
+			self::$app->httpResponse()->redirect( NewsController::getLinkToBuildIndex() );
 		}
 		/** sinon , c'est un admin partiel et il ne peut que supprimer sa news */
 		 elseif ($user->membertype()== 0 && $user->id() == $news->auteur())
 		 {
 			 $this->managers->getManagerOf( 'News' )->delete( $newsId );
 			 $this->managers->getManagerOf( 'Comments' )->deleteFromNews( $newsId );
-			 $this->app->user()->setFlash( 'La news a bien été supprimée !' );
-			 $this->app->httpResponse()->redirect( '.' );
+			 self::$app->user()->setFlash( 'La news a bien été supprimée !' );
+			 self::$app->httpResponse()->redirect( NewsController::getLinkToBuildIndex() );
 		 }
 		else {
-			$this->app->user()->setFlash( 'vous avez pas le droit de supprimer!' );
-			$this->app->httpResponse()->redirect('.');
+			self::$app->user()->setFlash( 'vous avez pas le droit de supprimer!' );
+			self::$app->httpResponse()->redirect(NewsController::getLinkToBuildIndex());
 		}
 	}
 	
 	public function executeDeleteComment( HTTPRequest $request ) {
 
 		/** je recupère les informations du membre connecté */
-		$user = $this->app->user()->getAttribute( 'Member' );
+		$user = self::$app->user()->getAttribute( 'Member' );
 		$manager=$this->managers->getManagerOf( 'Comments' );
 		$com= $manager->get($request->getData( 'id' ));
 		/** si le user est un admin supreme il supprime */
 		if ($user->membertype()== 1 ) {
 
 			$this->managers->getManagerOf( 'Comments' )->delete( $request->getData( 'id' ) );
-			$this->app->user()->setFlash( 'Le commentaire a bien été supprimé !' );
-			$this->app->httpResponse()->redirect( '.' );
+			self::$app->user()->setFlash( 'Le commentaire a bien été supprimé !' );
+			self::$app->httpResponse()->redirect( NewsController::getLinkToBuildIndex() );
 		}
 		/** sinon , c'est un admin partiel et il ne peut que supprimer son commentaire */
-		elseif ($user->membertype()== 0 && $user->id() == $com->auteur())
+		elseif ($user->membertype()== 0 && (int) $user->id() == $com->auteur())
 		{
 			$this->managers->getManagerOf( 'Comments' )->delete( $request->getData( 'id' ) );
-			$this->app->user()->setFlash( 'Le commentaire a bien été supprimé !' );
-			$this->app->httpResponse()->redirect( '.' );
+			self::$app->user()->setFlash( 'Le commentaire a bien été supprimé !' );
+			self::$app->httpResponse()->redirect(NewsController::getLinkToBuildIndex() );
 		}
 		else {
-			$this->app->user()->setFlash( 'vous avez pas le droit de supprimer!' );
-			$this->app->httpResponse()->redirect('.');
+			self::$app->user()->setFlash( 'vous avez pas le droit de supprimer!' );
+			self::$app->httpResponse()->redirect(NewsController::getLinkToBuildIndex());
 		}
 
 	}
@@ -96,7 +97,7 @@ class NewsController extends BackController {
 		$this->page->addVar( 'title', 'Modification d\'un commentaire' );
 
 		/** je recupère les informations du membre connecté */
-		$user = $this->app->user()->getAttribute( 'Member' );
+		$user = self::$app->user()->getAttribute( 'Member' );
 		$manager=$this->managers->getManagerOf( 'Comments' );
 		$com= $manager->get($request->getData( 'id' ));
 
@@ -106,7 +107,7 @@ class NewsController extends BackController {
 			if ( $request->method() == 'POST' ) {
 				$comment = new Comment( [
 					'id'      => $request->getData( 'id' ),
-					'auteur'  => $request->postData( 'auteur' ),
+					'auteur' => $request->postData('auteur'),
 					'contenu' => $request->postData( 'contenu' ),
 				] );
 			}
@@ -122,21 +123,21 @@ class NewsController extends BackController {
 			$formHandler = new FormHandler( $form, $this->managers->getManagerOf( 'Comments' ), $request );
 
 			if ( $formHandler->process() ) {
-				$this->app->user()->setFlash( 'Le commentaire a bien été modifié' );
+				self::$app->user()->setFlash( 'Le commentaire a bien été modifié' );
 
-				$this->app->httpResponse()->redirect( '/admin/' );
+				self::$app->httpResponse()->redirect( NewsController::getLinkToBuildIndex() );
 			}
 
 			$this->page->addVar( 'form', $form->createView() );
 		}
 		/** sinon , c'est un admin partiel et il ne peut que supprimer son commentaire */
-		elseif ($user->membertype()== 0 && $user->id() == $com->auteur())
+		elseif ($user->membertype()== 0 && (int) $user->id() == $com->auteur())
 		{
 
 			if ( $request->method() == 'POST' ) {
 				$comment = new Comment( [
 					'id'      => $request->getData( 'id' ),
-					'auteur'  => $request->postData( 'auteur' ),
+					'auteur' => (int) $user->id(),
 					'contenu' => $request->postData( 'contenu' ),
 				] );
 			}
@@ -152,16 +153,16 @@ class NewsController extends BackController {
 			$formHandler = new FormHandler( $form, $this->managers->getManagerOf( 'Comments' ), $request );
 
 			if ( $formHandler->process() ) {
-				$this->app->user()->setFlash( 'Le commentaire a bien été modifié' );
+				self::$app->user()->setFlash( 'Le commentaire a bien été modifié' );
 
-				$this->app->httpResponse()->redirect( '/admin/' );
+				self::$app->httpResponse()->redirect( NewsController::getLinkToBuildIndex() );
 			}
 
 			$this->page->addVar( 'form', $form->createView() );
 		}
 		else {
-			$this->app->user()->setFlash( 'vous avez pas le droit de modifier!' );
-			$this->app->httpResponse()->redirect( '/admin/' );
+			self::$app->user()->setFlash( 'vous avez pas le droit de modifier!' );
+			self::$app->httpResponse()->redirect( NewsController::getLinkToBuildIndex() );
 		}
 
 	}
@@ -170,52 +171,173 @@ class NewsController extends BackController {
 
 
 		/** je recupère les informations du membre connecté */
-		$user = $this->app->user()->getAttribute( 'Member' );
-		$manager=$this->managers->getManagerOf( 'News' );
+		$user    = self::$app->user()->getAttribute( 'Member' );
+		$manager = $this->managers->getManagerOf( 'News' );
+		$com = $manager->getUnique( $request->getData( 'id' ) );
+		 if($user->membertype()==0)
+		 {
+			 if ($request->method() == 'POST')
+			 {
+				 $news = new News([
+					 'auteur' => $user->id(),
+					 'titre' => $request->postData('titre'),
+					 'contenu' => $request->postData('contenu')
+				 ]);
+				 if ($request->getExists('id'))
+				 {
+					 $news->setId($request->getData('id'));
+				 }
+			 }
+			 else
+			 {
+				 // L'identifiant de la news est transmis si on veut la modifier
+				 if ($request->getExists('id')&& $user->id()!=$com->auteur())
+				 {
+					 self::$app->user()->setFlash('pas encore de news a mon nom, impossible de modifier');
+					 self::$app->httpResponse()->redirect(NewsController::getLinkToBuildIndex());
+				 }
 
-			if ( $request->method() == 'POST' ) {
-				$news = new News( [
-					'auteur'  => $request->postData( 'auteur' ),
-					'titre'   => $request->postData( 'titre' ),
-					'contenu' => $request->postData( 'contenu' ),
-				] );
+				else if ($request->getExists('id')&& $user->id()==$com->auteur())
+				 {
+					 $news = $this->managers->getManagerOf('News')->getUnique($request->getData('id'));
+				 }
+				 else
+				 {
+					 $news = new News;
 
-				if ( $request->getExists( 'id' ) ) {
-					$news->setId( $request->getData( 'id' ) );
+				 }
+
+			 }
+			 $formBuilder = new NewsFormBuilder($news);
+			 $formBuilder->build();
+			 $form = $formBuilder->form();
+			 $formHandler = new FormHandler($form, $this->managers->getManagerOf('News'), $request);
+
+			 if ($formHandler->process())
+			 {
+				 self::$app->user()->setFlash($news->isNew() ? 'La news a bien été ajoutée !' : 'La news a bien été modifiée !');
+
+				 self::$app->httpResponse()->redirect(NewsController::getLinkToBuildIndex());
+			 }
+			 $this->page->addVar('form', $form->createView());
+
+		 }
+
+		else
+		{
+
+			if ($request->method() == 'POST')
+			{
+				$news = new News([
+					'auteur' => $user->id(),
+					'titre' => $request->postData('titre'),
+					'contenu' => $request->postData('contenu')
+				]);
+				if ($request->getExists('id'))
+				{
+					$news->setId($request->getData('id'));
 				}
 			}
-			else {
+			else
+			{
 				// L'identifiant de la news est transmis si on veut la modifier
-				if ( $request->getExists( 'id' ) ) {
-					$news = $this->managers->getManagerOf( 'News' )->getUnique( $request->getData( 'id' ) );
-					$com=$manager->getUnique($request->getData( 'id' ));
-					if ($user->membertype()==0  && $user->id() == $com->auteur() )
-					{
-
-					}
-					 else{
-						 $this->app->user()->setFlash( ' vous avez pas le droit de modfier');
-						 $this->app->httpResponse()->redirect( '/admin/' );
-					 }
+				if ($request->getExists('id'))
+				{
+					$news = $this->managers->getManagerOf('News')->getUnique($request->getData('id'));
 				}
-				else {
+				else
+				{
 					$news = new News;
 				}
 			}
-
-			$formBuilder = new NewsFormBuilder( $news );
+			$formBuilder = new NewsFormBuilder($news);
 			$formBuilder->build();
-
 			$form = $formBuilder->form();
+			$formHandler = new FormHandler($form, $this->managers->getManagerOf('News'), $request);
+			if ($formHandler->process())
+			{
+				self::$app->user()->setFlash($news->isNew() ? 'La news a bien été ajoutée !' : 'La news a bien été modifiée !');
 
-			$formHandler = new FormHandler( $form, $this->managers->getManagerOf( 'News' ), $request );
-
-			if ( $formHandler->process() ) {
-				$this->app->user()->setFlash( $news->isNew() ? 'La news a bien été ajoutée !' : 'La news a bien été modifiée !' );
-
-				$this->app->httpResponse()->redirect( '/admin/' );
+				self::$app->httpResponse()->redirect(NewsController::getLinkToBuildIndex());
 			}
-
-			$this->page->addVar( 'form', $form->createView() );
+			$this->page->addVar('form', $form->createView());
 		}
+
+	}
+
+	/**
+	 * Renvoie le lien de la page d'accueil Backend
+	 *
+	 * @return string
+	 */
+	static public function getLinkToBuildIndex() {
+		return Router::getUrlFromModuleAndAction( 'Backend', 'News', 'index' );
+	}
+
+	/**
+	 * Renvoie le lien de la page de maj d'une news
+	 * @param News $news
+	 *
+	 * @return string
+	 */
+	static public function getLinkToPutUpdateNews(News $news) {
+		$id = $news->id();
+		if (empty($id)) {
+			throw new \RuntimeException('Impossible de creer le lien du Comment : L\'id du Comment n\'est pas renseigné !');
+		}
+		return Router::getUrlFromModuleAndAction( 'Backend', 'News', 'update', array('id' => (int)$news->id()) );
+	}
+
+	/**
+	 * Renvoie le lien de la page de suppression d'une news
+	 * @param News $news
+	 *
+	 * @return string
+	 */
+	static public function getLinkToDeleteNews(News $news) {
+		$id = $news->id();
+		if (empty($id)) {
+			throw new \RuntimeException('Impossible de creer le lien du Comment : L\'id du Comment n\'est pas renseigné !');
+		}
+		return Router::getUrlFromModuleAndAction( 'Backend', 'News', 'delete', array('id' => (int)$news->id()) );
+	}
+
+	/**
+	 * Renvoie le lien de la page de creation d'une news
+	 * @return string
+	 */
+	static public function getLinkToPutInsertNews() {
+		return Router::getUrlFromModuleAndAction( 'Backend', 'News', 'insert' );
+	}
+
+	/**
+	 * Renvoie le lien de la page de maj d'un Comment
+	 * @param Comment $Comment
+	 *
+	 * @return string
+	 */
+	static public function getLinkToPutUpdateComment(Comment $Comment) {
+		$id = $Comment->id();
+		if (empty($id)) {
+			throw new \RuntimeException('Impossible de creer le lien du Comment : L\'id du Comment n\'est pas renseigné !');
+		}
+		return Router::getUrlFromModuleAndAction( 'Backend', 'News', 'updateComment', array('id' => (int)$Comment->id()) );
+	}
+
+	/**
+	 * Renvoie le lien de la page de suppression d'un Comment
+	 * @param Comment $Comment
+	 *
+	 * @return string
+	 */
+	static public function getLinkToDeleteComment(Comment $Comment) {
+		$id = $Comment->id();
+		if (empty($id)) {
+			throw new \RuntimeException('Impossible de creer le lien du Comment : L\'id du Comment n\'est pas renseigné !');
+		}
+		return Router::getUrlFromModuleAndAction( 'Backend', 'News', 'deleteComment', array('id' => (int)$Comment->id()) );
+	}
+
 }
+
+

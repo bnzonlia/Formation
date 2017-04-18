@@ -7,13 +7,18 @@ class NewsManagerPDO extends NewsManager
 {
 	protected function add(News $news)
 	{
-		$requete = $this->dao->prepare('INSERT INTO news SET auteur = :auteur, titre = :titre, contenu = :contenu, dateAjout = NOW(), dateModif = NOW()');
-		
-		$requete->bindValue(':titre', $news->titre());
-		$requete->bindValue(':auteur', $news->auteur());
-		$requete->bindValue(':contenu', $news->contenu());
-		
-		$requete->execute();
+		/**
+		 * @var $stmt  \PDOStatement
+		 * @var $News  News
+		 */
+		$sql = 'INSERT INTO news (auteur,titre,contenu,dateAjout,dateModif)
+                    VALUES (:auteur,:titre,:contenu,NOW(),NOW())';
+
+		$stmt = $this->dao->prepare( $sql );
+		$stmt->bindValue( ':auteur', $news->auteur(), \PDO::PARAM_INT );
+		$stmt->bindValue( ':titre', $news->titre(), \PDO::PARAM_STR );
+		$stmt->bindValue( ':contenu', $news->contenu(), \PDO::PARAM_STR );
+		$stmt->execute();
 	}
 	public function count()
 	{
@@ -112,17 +117,12 @@ class NewsManagerPDO extends NewsManager
 
 	protected function modify(News $news)
 	{
-		$requete = $this->dao->prepare('UPDATE news SET auteur = :auteur, titre = :titre, contenu = :contenu, dateModif = NOW() WHERE id = :id');
+		$requete = $this->dao->prepare('UPDATE news SET titre = :titre, contenu = :contenu, dateModif = NOW() WHERE id = :id');
 		
 		$requete->bindValue(':titre', $news->titre());
-		$requete->bindValue(':auteur', $news->auteur());
 		$requete->bindValue(':contenu', $news->contenu());
 		$requete->bindValue(':id', $news->id(), \PDO::PARAM_INT);
 		
 		$requete->execute();
-	}
-	public function getAuthorId()
-	{
-		return $this->dao->query('SELECT id FROM news')->fetchAll();
 	}
 }
