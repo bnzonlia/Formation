@@ -3,6 +3,8 @@ namespace OCFram;
 
 class HTTPRequest extends ApplicationComponent
 {
+	const POST_METHOD = 'POST';
+	
 	public function cookieData($key)
 	{
 		return isset($_COOKIE[$key]) ? $_COOKIE[$key] : null;

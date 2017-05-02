@@ -3,13 +3,17 @@
 namespace App\Backend\Modules\Connexion;
 
 use App\Backend\Modules\News\NewsController;
+use App\Traits\MenuController;
 use Model\UserManager;
 use \OCFram\BackController;
 use \OCFram\HTTPRequest;
 use \Entity\User;
+use \OCFram\Router;
 
 class ConnexionController extends BackController {
+	use MenuController;
 	public function executeIndex( HTTPRequest $request ) {
+		$this->run();
 		$this->page->addVar( 'title', 'Connexion' );
 		
 		if ( $request->postExists( 'login' ) ) {
@@ -37,8 +41,13 @@ class ConnexionController extends BackController {
 	}
 	
 	public function executeLogout( HTTPRequest $request ) {
+		$this->run();
 		session_unset();
 		session_destroy();
 		self::$app->httpResponse()->redirect(\App\Frontend\Modules\News\NewsController::getLinkToBuildIndex() );
+	}
+	
+	static public function getLinkToClearConnection() {
+		return Router::getUrlFromModuleAndAction( 'Backend', 'Connexion', 'logout' );
 	}
 }

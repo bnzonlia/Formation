@@ -9,6 +9,9 @@ class User
 	{
 		return isset($_SESSION[$attr]) ? $_SESSION[$attr] : null;
 	}
+	public function hasAttribute($attr) {
+		return isset($_SESSION[$attr]);
+	}
 	
 	public function getFlash()
 	{

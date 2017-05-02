@@ -2,7 +2,15 @@
 /**
  * @var $user    \OCFram\User
  * @var $content string Contenu de la page à afficher
+ *                      **
+ * @var $User    \OCFram\User Session utilisateur
+ * @var $content string Contenu de la page générée
+ * @var $menu_a array[] Panneau menu personnalisé en fonction de l'authentification
+ * @var $flash string Affichage du flash (message à l'utilisateur)
+ * @var $h1_link_a string[] Liste des liens à afficher
  */
+
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -19,23 +27,17 @@
 	<body>
 		<div id="wrap">
 			<header>
-				<h1><a href="/">Mon super site</a></h1>
+				<?php foreach ($h1_link_a as $element_a): ?>
+					<h1><a href="<?= $element_a['url']?>"><?= $element_a['label'] ?></a></h1>
+				<?php endforeach; ?>
 				<p>Comment ça, il n'y a presque rien ?</p>
 			</header>
 			
 			<nav>
 				<ul>
-					<?php if ( $User->isAuthenticated()==false ) { ?>
-						<li><a href="/">Accueil</a></li>
-						<li><a href="/connexion/">Connexion</a></li>
-						<li><a href="/inscription/">S'inscrire</a></li>
-					<?php } ?>
-					<?php if ( $User->isAuthenticated() ) { ?>
-						<li><a href="/">Accueil</a></li>
-						<li><a href="/admin/">Admin</a></li>
-						<li><a href="/admin/news-insert.html">Ajouter une news</a></li>
-						<li><a href="/admin/logout.php">Se deconnecter</a></li>
-					<?php } ?>
+					<?php foreach ($menu_a as $element_a): ?>
+						<li><a href="<?= $element_a['url'] ?>"><?= $element_a['label']?></a></li>
+					<?php endforeach; ?>
 				</ul>
 			</nav>
 			

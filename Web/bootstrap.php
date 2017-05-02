@@ -24,6 +24,8 @@ $entityLoader->register();
 $formBuilderLoader = new SplClassLoader('FormBuilder', __DIR__.'/../lib/vendors');
 $formBuilderLoader->register();
 
+$HelpersLoader = new SplClassLoader( 'Helpers', __DIR__ . '\..\lib');
+$HelpersLoader->register();
 
 // Il ne nous suffit plus qu'à déduire le nom de la classe et de l'instancier
 $appClass = 'App\\'.$_GET['app'].'\\'.$_GET['app'].'Application';

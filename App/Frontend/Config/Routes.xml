@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <routes>
-	<route url="/" module="News" action="index" ></route>
-	<route url="/inscription/" module="Inscription" action="inscription" ></route>
-	<route url="/connexion/" module="connexion" action="index" ></route>
-	<route url="/news-([0-9]+)\.html" module="News" action="show" vars="id"></route>
-	<route url="/commenter-([0-9]+)\.html" module="News" action="insertComment" vars="news" ></route>
+	<route url="/" module="News" action="index" />
+	<route url="/inscription/" module="Inscription" action="inscription" />
+	<route url="/connexion/" module="Connexion" action="index"/>
+	<route url="/news-([0-9]+)\.html" module="News" action="show" vars="id"/>
+	<route url="/commenter-([0-9]+)\.html" module="News" action="insertComment" vars="id" />
 	<route url="/commenter-([0-9]+)\.json" module="News" action="insertCommentFromAjax" vars="id" format="json" />
-	<route url="/refresh-comments-([0-9]+)\.json" module="News" action="RefreshCommentsFromAjax" vars="id" format="json" />
+	<route url="/refresh-comments-([0-9]+)\.([0-9]+)\.json" module="News" action="refreshCommentsFromAjax" vars="id,lastcomment" format="json" />
 </routes>

@@ -2,8 +2,8 @@
 
 namespace App\Frontend\Modules\Inscription;
 
-use App\Backend\Modules\Connexion\ConnexionController;
 use App\Backend\Modules\News\NewsController;
+use App\Traits\MenuController;
 use \OCFram\BackController;
 use \OCFram\HTTPRequest;
 use \Entity\User;
@@ -11,7 +11,10 @@ use \FormBuilder\SubscriptionFormBuilder;
 use \OCFram\FormHandler;
 
 class InscriptionController extends BackController {
+	use MenuController;
+	
 	public function executeInscription( HTTPRequest $request ) {
+		$this->run();
 		if ( $request->method() == 'POST' ) {
 			$user = new User( [
 				'firstname'    => $request->postData( 'firstname' ),

@@ -94,7 +94,7 @@ class Page extends ApplicationComponent {
 
 		ob_start();
 
-		require __DIR__ . '/../../App/' . self::$app->name() . '/templates/layout.' . $this->format . '.php'; // Construction dynamique du chemin de layout OK
+		require __DIR__ . '/../../App/' . self::$app->name() . '/templates/layout.' . $this->format . '.php'; 
 
 		return ob_get_clean();
 	}
@@ -108,15 +108,7 @@ class Page extends ApplicationComponent {
 	 */
 		/** @noinspection PhpUnusedLocalVariableInspection */
 		$User = self::$app->user();
-
-		//		if ( $this->format == 'json' ) {
-		//			// On serialize toutes les Entity passées en paramètre
-		//			foreach ( $this->vars as &$element ) {
-		//				if ( $element instanceof Entity ) {
-		//					$element = json_encode( $element );
-		//				}
-		//			}
-		//		}
+		
 		extract( $this->vars );
 
 		// Créer la page en bufferisation

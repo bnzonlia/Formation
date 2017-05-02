@@ -71,4 +71,13 @@ abstract class UserManager extends Manager
 	 * @return User
 	 */
 	abstract public function getUserUsingLogin($login);
+
+	abstract public function existsUserUsingLogin($login);
+	
+	/**
+	 * recuperer un user grace a son id
+	 * @param string $lid
+	 * @return User
+	 */
+	abstract public function getUserUsingId($id);
 }

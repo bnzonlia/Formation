@@ -78,15 +78,15 @@ abstract class Application {
 			 * @var $route \OCFram\Route
 			 */
 			$route = $this->Router->getRoute( $this->httpRequest()->requestURI() );
-			
+
 			// 3) Ajouter les variables lues dans l'url au tableau _GET
 			// En effet ce sont des variables récupérées par l'url
 			$_GET = array_merge( $_GET, $route->vars() );
-			
+
 			// 4) Instanciation du contrôleur
 			$controllerClass = 'App\\' . $this->name . '\\Modules\\' . $route->module() . '\\' . $route->module() . 'Controller';
 			return new $controllerClass( $this, $route->module(), $route->action(), $route->format());
-			
+
 		}
 		catch ( \RuntimeException $e ) {
 			if ( $e->getCode() == Router::ROUTE_NOT_FOUND ) // Si on n'a pas trouvé la route, erreur 404

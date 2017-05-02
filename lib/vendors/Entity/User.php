@@ -3,7 +3,7 @@ namespace Entity;
 
 use \OCFram\Entity;
 
-class User extends Entity
+class User  extends Entity
 {
 	protected $id,
 		$firstname,
@@ -128,4 +128,7 @@ class User extends Entity
 	{
 		return $this->membertype;
 	}
+
+	
+	
 }

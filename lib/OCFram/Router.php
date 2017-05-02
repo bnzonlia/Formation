@@ -35,6 +35,7 @@ class Router extends ApplicationComponent {
 		$xml = new \DOMDocument();
 		$xml->load( __DIR__ . '/../../App/' . $app_name . '/Config/routes.xml' );
 		$route_list = $xml->getElementsByTagName( 'route' );
+
 		foreach ( $route_list as $route ) {
 
 			// Récupérer les arguments nécessaires à la route
@@ -50,7 +51,7 @@ class Router extends ApplicationComponent {
 				'varsNames'      => $vars,
 				'format'         => $format,
 			) ) );
-			
+
 		}
 	}
 
@@ -88,26 +89,35 @@ class Router extends ApplicationComponent {
 			/**
 			 * @var $Route Route
 			 */
+
 			if ( $Route->module() === $module && $Route->action() === $action ) {
 				// On a trouvé un module et une action qui correspondent : on vérifie si on a le bon nombre de paramètres
 				$route_attribute_count = count( $Route->varsNames() );
+
 				if ( count( $given_values_a ) === $route_attribute_count ) {
 					// En plus elle a le bon nombre d'attributs
 					// Prendre l'url
 					$url = $Route->url();
+
 					if ( 0 != $route_attribute_count ) {
 						// Rechercher les parties variables : elles sont indiquées par des parenthèses dans l'URL
-						preg_match( '/\(.+\)/', $url, $pattern_a );
+						preg_match_all( '/\(.+?\)/', $url, $pattern_a );
+
+						$pattern_a = $pattern_a[0];
+
 						// Associer les clés des noms de variables aux parties variables
 						$replacement_a = array_combine( $Route->varsNames(), $pattern_a );
+
+
 						foreach ( $replacement_a as $var_name => $pattern ) {
 							// Si le pattern est respecté, alors on remplace l'élément correspondant dans l'URL
 							// On vérifie d'abord s'il est bien set.
 							if ( !isset( $given_values_a[ $var_name ] ) ) {
+
 								throw new \InvalidArgumentException( 'Le paramètre ' . $var_name . ' n\'est pas renseigné et est nécessaire au fonctionnement de la route.' );
 							}
 							if ( preg_match( '/^' . $pattern . '$/', $given_values_a[ $var_name ] ) ) {
-								$url = preg_replace( '/\(.+\)/', $given_values_a[ $var_name ], $url, 1 );
+								$url = preg_replace( '/\(.+?\)/', $given_values_a[ $var_name ], $url, 1 );
 							}
 							else {
 								throw new \InvalidArgumentException( 'Les paramètres de la route ne correspondent pas aux paramètres indiqués dans la configuration.' );

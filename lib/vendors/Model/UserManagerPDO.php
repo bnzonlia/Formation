@@ -137,4 +137,43 @@ class UserManagerPDO extends UserManager
 		}
 		return null;
 	}
+	
+	/**
+	 * Vérifie si l'utilisateur de pseudo donné existe déjà.
+	 *
+	 * @param string $userc_login
+	 *
+	 * @return bool
+	 */
+	public function existsUserUsingLogin($login) {
+		$sql = 'SELECT *
+				FROM T_mem_memberc
+				WHERE 	MMC_login = :login';
+		$stmt = $this->dao->prepare($sql);
+		$stmt->bindValue(':login', $login);
+		$stmt->execute();
+		return (bool)$stmt->fetch();
+	}
+	
+	/**
+	 * recuperer un user grace a son id
+	 * @param string $login
+	 *
+	 * @return User
+	 */
+	public function getUserUsingId($id)
+	{
+		$sql= $this->dao->prepare('SELECT MMC_id as id, MMC_firstname as firstname, MMC_lastname as lastname, MMC_login as login, MMC_password as password, MMC_datebirth  as datebirth , MMC_fk_MMY as membertype FROM  t_mem_memberc WHERE MMC_id = :MMC_id');
+		$sql->bindvalue(':MMC_id',(string) $id);
+		$sql->execute();
+		$sql->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, '\Entity\User');
+		
+		if ($user = $sql->fetch())
+		{
+			$user->setDateBirth(new \DateTime($user->datebirth()));
+			
+			return $user;
+		}
+		return null;
+	}
 }

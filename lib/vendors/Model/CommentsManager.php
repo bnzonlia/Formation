@@ -34,23 +34,30 @@ abstract class CommentsManager extends Manager
 	 * @param $comment Le commentaire à enregistrer
 	 * @return void
 	 */
-	public function save(Comment $comment)
-	{
-		if(!is_int($comment->auteur()))
-		{
-			//recuperation du string en id
-			$User_manager = new UserManagerPDO($this->dao);
-			$user =$User_manager->getUserUsingLogin($comment->auteur());
-			if($user ==null)
-			{
-				throw new 	\RuntimeException('le user n\'existe pas');
-			}
-			 $comment->setAuteur($user->id());
-		}
+	public function save(Comment $comment) {
 
 		if ($comment->isValid())
 		{
-			$comment->isNew() ? $this->InsertCommentc($comment) : $this->UpdateCommentc($comment);
+			if ($comment->isNew()) {
+				
+				if(!is_int($comment->auteur()))
+				{
+					
+					//recuperation du string en id
+					$User_manager = new UserManagerPDO($this->dao);
+					$user =$User_manager->getUserUsinglogin($comment->auteur());
+					if($user==null)
+					{
+						throw new 	\RuntimeException('le user n\'existe pas');
+					}
+					$comment->setAuteur($user->id());
+					
+				}
+				$this->InsertCommentc($comment);
+			}
+			else {
+				$this->UpdateCommentc($comment);
+			}
 		}
 		else
 		{
@@ -78,4 +85,29 @@ abstract class CommentsManager extends Manager
 	 * @return Comment
 	 */
 	abstract public function getCommentcUsingCommentcId($commentc_id);
+	
+	/*
+	 * Récupère tous les commentaires d'une news créés après la date demandée. Construit aussi l'attribut User pour les commentaires écrits par des personnes inscrites.
+	 *
+	 * @param int $newsc_id
+	 * @param string $commentc_datec
+	 */
+	abstract public function getCommentcUsingNewscIdFilterOverDatecreationSortByIdDesc( $newsc_id, $comment_last );
+	
+	/*
+	 * Récupère tous les commentaires d'une news modifiés après la date demandée.
+	 *
+	 * @param int $newsc_id
+	 * @param string $commentc_dateu
+	 */
+	abstract public function getCommentcAndUsercUsingNewscIdFilterOverEditedAfterDateupdateAndCreatedBeforeDateupdateSortByIdDesc( $newsc_id, $commentc_dateupdate );
+	
+	/**
+	 * Filtre tous les ids de commentaires qui n'existent pas.
+	 *
+	 * @param int[] $commentc_id_a
+	 *
+	 * @return int[]|[]
+	 */
+	abstract public function filterCommentcUsingUnexistantCommentcId( array $commentc_id_a );
 }

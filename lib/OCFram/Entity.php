@@ -1,7 +1,7 @@
 <?php
 namespace OCFram;
 
-abstract class Entity implements \ArrayAccess
+abstract class Entity implements \ArrayAccess , \JsonSerializable
 {
 	use Hydrator;
 	
@@ -62,5 +62,10 @@ abstract class Entity implements \ArrayAccess
 	public function offsetUnset($var)
 	{
 		throw new \Exception('Impossible de supprimer une quelconque valeur');
+	}
+
+	// Implémentation de JsonSerialisable
+	public function jsonSerialize() {
+		return get_object_vars($this);
 	}
 }

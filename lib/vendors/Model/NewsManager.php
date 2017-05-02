@@ -60,4 +60,6 @@ abstract class NewsManager extends Manager
 	 * @return void
 	 */
 	abstract protected function UpdateNewsc(News $news);
+	
+	abstract public function existsNewscUsingNewscId( $newsc_id );
 }

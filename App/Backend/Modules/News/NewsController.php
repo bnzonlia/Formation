@@ -2,6 +2,8 @@
 
 namespace App\Backend\Modules\News;
 
+use App\Traits\MenuController;
+use Model\CommentsManager;
 use Model\NewsManagerPDO;
 use \OCFram\BackController;
 use \OCFram\HTTPRequest;
@@ -11,14 +13,17 @@ use \Entity\Comment;
 use \FormBuilder\CommentFormBuilder;
 use \FormBuilder\NewsFormBuilder;
 use \OCFram\FormHandler;
+use OCFram\Manager;
 use OCFram\Router;
 
 class NewsController extends BackController {
+	use MenuController;
 	public function executeDelete( HTTPRequest $request ) {
-		
+		$this->run();
 		$newsId = $request->getData( 'id' );
 		
 		/** je recupère les informations du membre connecté */
+		/** @var User $user */
 		$user = self::$app->user()->getAttribute( 'Member' );
 		/** @var NewsManagerPDO $manager */
 		$manager=$this->managers->getManagerOf( 'News' );
@@ -46,7 +51,7 @@ class NewsController extends BackController {
 	}
 	
 	public function executeDeleteComment( HTTPRequest $request ) {
-
+		$this->run();
 		/** je recupère les informations du membre connecté */
 		$user = self::$app->user()->getAttribute( 'Member' );
 		$manager=$this->managers->getManagerOf( 'Comments' );
@@ -72,7 +77,164 @@ class NewsController extends BackController {
 
 	}
 	
+	public function executeDeleteCommentFromAjax( HTTPRequest $request ) {
+		$this->run();
+		/** je recupère les informations du membre connecté */
+		/** @var User $user */
+		$user = self::$app->user()->getAttribute( 'Member' );
+		/** @var CommentsManager $manager */
+		$manager=$this->managers->getManagerOf( 'Comments' );
+		/** @var Comment $com */
+		$com= $manager->getCommentcUsingCommentcId($request->getData( 'id' ));
+		/** si le user est un admin supreme il supprime */
+		if ($user->membertype()== 1 ) {
+			
+			$this->managers->getManagerOf( 'Comments' )->deleteCommentcUsingCommentcId( $request->getData( 'id' ) );
+		}
+		/** sinon , c'est un admin partiel et il ne peut que supprimer son commentaire */
+		elseif ($user->membertype()== 0 && (int) $user->id() == $com->auteur())
+		{
+			$this->managers->getManagerOf( 'Comments' )->deleteCommentcUsingCommentcId( $request->getData( 'id' ) );
+		}
+	}
+	
+	/**
+	 * Met à jour un commentaire.
+	 *
+	 * Si le commentaire n'existe pas, redirige vers une erreur 404.
+	 *
+	 * @param HTTPRequest $Request
+	 */
+	public function executeUpdateCommentFromAjax( HTTPRequest $Request ) {
+		$this->run();
+		/** je recupère les informations du membre connecté */
+		/** @var User $user */
+		$user = self::$app->user()->getAttribute( 'Member' );
+		/** @var CommentsManager $manager */
+		$manager=$this->managers->getManagerOf( 'Comments' );
+		// Récupérer le commentaire
+		$Comment = $manager->getCommentcUsingCommentcId( $Request->getData( 'id' ) );
+		/** si le user est un admin supreme il supprime */
+		if ($user->membertype()== 1 ) {
+			/** @var CommentsManager $manager */
+			
+				// Construire le formulaire
+				$Form_builder = new CommentFormBuilder( $Comment );
+				$Form_builder->build();
+				$Form = $Form_builder->form();
+				$this->page->addVar( 'Comment', $Comment );
+			}
+		
+		elseif ($user->membertype()== 0 && (int) $user->id() == $Comment->auteur()) {
+			// Construire le formulaire
+			$Form_builder = new CommentFormBuilder( $Comment );
+			$Form_builder->build();
+			$Form = $Form_builder->form();
+			$this->page->addVar( 'form', $Form->createView() );
+			$this->page->addVar( 'Comment', $Comment );
+		}
+		}
+	
+	public function executeAfterUpdateForSaveCommentFromAjax( HTTPRequest $Request ) {
+		$this->run();
+		/** je recupère les informations du membre connecté */
+		/** @var User $user */
+		$user = self::$app->user()->getAttribute( 'Member' );
+		/** @var CommentsManager $manager */
+		$manager=$this->managers->getManagerOf( 'Comments' );
+		
+		// Récupérer le contenu du nouveau commentaire
+		$Comment = $manager->getCommentcUsingCommentcId( $Request->getData( 'id' ) );
+		
+		 
+		/** si le user est un admin supreme il sauvegarde */
+		if ($user->membertype()== 1 ) {
+			if ( $Request->postData( 'contenu' ) !== null ) {
+				$Comment->setContenu( $Request->postData( 'contenu' ) );
+			}
+			
+			if ( null === $Comment ) {
+				die( 'Le commentaire à éditer n\'existe pas !');
+			}
+			
+			else {
+				// Construire le formulaire
+				$Form_builder = new CommentFormBuilder( $Comment );
+				$Form_builder->build();
+				$Form = $Form_builder->form();
+				
+				if ( $Request->postData( 'contenu' ) !== null ) {
+					// Sauvegarder avec le FormHandler
+					$Form_handler = new FormHandler( $Form, $manager, $Request );
+					if ( !$Form_handler->process() ) {
+						$error_a = [ ];
+						// On envoie les erreurs si besoin
+						foreach ( $Form->Field_a() as $Field ) {
+							if ( $Field->errorMessage() != null ) {
+								$error_a[ $Field->name() ] = $Field->errorMessage();
+							}
+						}
+						// Envoyer les erreurs
+						$this->page->addVar( 'form', $Form->createView() );
+					}
+					// Récupérer le nouvel état du commentaire (date d'update par exemple)
+					else {
+						$Comment = $manager->getCommentcUsingCommentcId( $Request->getData( 'id' ) );
+					}
+				}
+				else {
+					$this->page->addVar( 'form', $Form->createView() );
+				}
+				// Ne pas envoyer le form si OK
+				$this->page->addVar( 'Comment', $Comment );
+			}
+		}
+		elseif ($user->membertype()== 0 && (int) $user->id() == (int) $Comment->auteur()) {
+			//var_dump($Request->postData( 'contenu' ));
+				if ( $Request->postData( 'contenu' ) !== null ) {
+					$Comment->setContenu( $Request->postData( 'contenu' ) );
+				}
+				
+				if ( null === $Comment ) {
+					die( 'Le commentaire à éditer n\'existe pas !');
+				}
+			
+				else {
+					// Construire le formulaire
+					$Form_builder = new CommentFormBuilder( $Comment );
+					$Form_builder->build();
+					$Form = $Form_builder->form();
+					
+					if ( $Request->postData( 'contenu' ) !== null ) {
+						// Sauvegarder avec le FormHandler
+						$Form_handler = new FormHandler( $Form, $manager, $Request );
+						if ( !$Form_handler->process() ) {
+							$error_a = [ ];
+							// On envoie les erreurs si besoin
+							foreach ( $Form->Field_a() as $Field ) {
+								if ( $Field->errorMessage() != null ) {
+									$error_a[ $Field->name() ] = $Field->errorMessage();
+								}
+							}
+							// Envoyer les erreurs
+							$this->page->addVar( 'form', $Form->createView() );
+						}
+						// Récupérer le nouvel état du commentaire (date d'update par exemple)
+						else {
+							$Comment = $manager->getCommentcUsingCommentcId( $Request->getData( 'id' ) );
+						}
+					}
+					else {
+						$this->page->addVar( 'form', $Form->createView() );
+					}
+					// Ne pas envoyer le form si OK
+					$this->page->addVar( 'Comment', $Comment );
+				}
+			}
+		}
+	
 	public function executeIndex( HTTPRequest $request ) {
+		$this->run();
 		$this->page->addVar( 'title', 'Gestion des news' );
 		
 		/** @var NewsManagerPDO $manager */
@@ -83,21 +245,25 @@ class NewsController extends BackController {
 	}
 	
 	public function executeInsert( HTTPRequest $request ) {
+		$this->run();
 		$this->processForm( $request );
 		
 		$this->page->addVar( 'title', 'Ajout d\'une news' );
 	}
 	
 	public function executeUpdate( HTTPRequest $request ) {
+		$this->run();
 		$this->processForm( $request );
 		
 		$this->page->addVar( 'title', 'Modification d\'une news' );
 	}
 	
 	public function executeUpdateComment( HTTPRequest $request ) {
+		$this->run();
 		$this->page->addVar( 'title', 'Modification d\'un commentaire' );
 
 		/** je recupère les informations du membre connecté */
+		/** @var User $user */
 		$user = self::$app->user()->getAttribute( 'Member' );
 		$manager=$this->managers->getManagerOf( 'Comments' );
 		$com= $manager->getCommentcUsingCommentcId($request->getData( 'id' ));
@@ -169,9 +335,10 @@ class NewsController extends BackController {
 	}
 	
 	public function processForm( HTTPRequest $request ) {
-
-
+		
+		$this->run();
 		/** je recupère les informations du membre connecté */
+		/** @var User $user */
 		$user    = self::$app->user()->getAttribute( 'Member' );
 		/** @var NewsManagerPDO $manager */
 		$manager = $this->managers->getManagerOf( 'News' );
@@ -325,6 +492,15 @@ class NewsController extends BackController {
 		}
 		return Router::getUrlFromModuleAndAction( 'Backend', 'News', 'updateComment', array('id' => (int)$Comment->id()) );
 	}
+	
+	static public function getLinkToPutUpdateCommentFromAjax( Comment $Comment ) {
+		$id = $Comment->id();
+		if ( empty( $id ) ) {
+			throw new \RuntimeException( 'Can\'t create Comment link : Comment id is unknown !' );
+		}
+		
+		return Router::getUrlFromModuleAndAction( 'Backend', 'News', 'putUpdateCommentFromAjax', array( 'id' => (int)$id ) );
+	}
 
 	/**
 	 * Renvoie le lien de la page de suppression d'un Comment
@@ -339,7 +515,7 @@ class NewsController extends BackController {
 		}
 		return Router::getUrlFromModuleAndAction( 'Backend', 'News', 'deleteComment', array('id' => (int)$Comment->id()) );
 	}
-
+	
 }
 
 

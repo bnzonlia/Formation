@@ -16,7 +16,7 @@ class Comment extends Entity
 	
 	public function isValid()
 	{
-		return !empty( $this->contenu ) AND is_string( $this->contenu );
+		return !empty( $this->contenu ) && is_string( $this->contenu );
 	}
 	
 	public function setNews($news)
@@ -77,4 +77,5 @@ class Comment extends Entity
 	{
 		return $this->dateu;
 	}
+	
 }

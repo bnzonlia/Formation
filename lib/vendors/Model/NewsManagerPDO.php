@@ -125,4 +125,26 @@ class NewsManagerPDO extends NewsManager
 		
 		$requete->execute();
 	}
+	
+	/**
+	 * Vérifie si la news d'id donné existe. Renvoie true si elle existe, false sinon.
+	 *
+	 * @param $newsc_id int
+	 *
+	 * @return bool
+	 */
+	public function existsNewscUsingNewscId( $newsc_id ) {
+		$sql = 'SELECT *
+				FROM news
+				WHERE id = :id';
+		
+		$stmt = $this->dao->prepare( $sql );
+		$stmt->bindValue( ':id', (int)$newsc_id, \PDO::PARAM_INT );
+		$stmt->execute();
+		$return = (bool)$stmt->fetch();
+		
+		$stmt->closeCursor();
+		
+		return (bool)$return;
+	}
 }

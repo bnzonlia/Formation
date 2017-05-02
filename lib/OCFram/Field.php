@@ -105,4 +105,22 @@ abstract class Field
 			$this->value = $value;
 		}
 	}
+	
+	/**
+	 * Setter pour l'attribut errorMessage
+	 *
+	 * @param string $errorMessage
+	 */
+	public function setErrorMessage( $errorMessage) {
+		if (!is_string($this->errorMessage) || empty($this->errorMessage)) {
+			$this->errorMessage = $errorMessage;
+		}
+	}
+
+	/**
+	 * @return string
+	 */
+	public function errorMessage() {
+		return $this->errorMessage;
+	}
 }
